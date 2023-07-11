@@ -1,0 +1,55 @@
+version: "3.9"
+services:
+  service-postgres:
+    container_name: go-service-db
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=go_service
+    ports:
+      - 5432:5432
+    volumes:
+      - go-service-volume:/var/lib/postgresql/data
+    networks:
+      - go-service-net
+
+  service-migrate:
+    container_name: go-service-migrate
+    build:
+      context: .
+      dockerfile: ./deployments/Dockerfile-migrate
+    environment:
+      - POSTGRES_URL=postgresql://postgres:password@service-postgres:5432/go_service
+    networks:
+      - go-service-net
+    depends_on:
+      - service-postgres
+
+  service-app:
+    container_name: go-service
+    image: go-service:latest
+    build:
+      context: .
+      dockerfile: ./deployments/Dockerfile
+    environment:
+      - APP_PORT=8080
+      - POSTGRES_URL=postgresql://postgres:password@service-postgres:5432/go_service
+      - DEV_MODE=false
+      - PREFORK=true
+      - ES256_PRIVATE_KEY=./deployments/ec_private.pem
+      - ES256_PUBLIC_KEY=./deployments/ec_public.pem
+    ports:
+      - 8080:8080
+    networks:
+      - go-service-net
+    depends_on:
+      - service-postgres
+    restart: on-failure
+
+networks:
+  go-service-net:
+    driver: bridge
+
+volumes:
+  go-service-volume:

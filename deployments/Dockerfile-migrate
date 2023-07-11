@@ -1,0 +1,14 @@
+# ================= builder =================
+FROM golang:1.20-alpine as builder
+
+WORKDIR /app
+
+# download dependency
+COPY go.* ./
+RUN go mod download
+
+# copy the source file
+COPY ./cmd ./cmd
+COPY ./internal ./internal
+
+CMD go run ./cmd/migrate/migrate.go

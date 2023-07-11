@@ -1,0 +1,326 @@
+basePath: /v1
+definitions:
+  handlers.AccessTokenResponse:
+    description: Access Token response body
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        type: integer
+      token_type:
+        type: string
+    type: object
+  handlers.CreateClientBody:
+    properties:
+      client_id:
+        maxLength: 64
+        type: string
+      client_secret:
+        maxLength: 64
+        type: string
+    required:
+    - client_id
+    - client_secret
+    type: object
+  handlers.CreateUserBody:
+    properties:
+      email:
+        default: example@example.com
+        maxLength: 32
+        minLength: 6
+        type: string
+      name:
+        default: John Doe
+        maxLength: 32
+        minLength: 3
+        type: string
+    required:
+    - email
+    - name
+    type: object
+  handlers.UpdateUserBody:
+    properties:
+      email:
+        default: example@example.com
+        maxLength: 32
+        minLength: 6
+        type: string
+      name:
+        default: John Doe
+        maxLength: 32
+        minLength: 3
+        type: string
+    required:
+    - email
+    - name
+    type: object
+  handlers.errorResponse:
+    description: Common error response.
+    properties:
+      message:
+        type: string
+    type: object
+  models.User:
+    description: User information includes id, email, and name.
+    properties:
+      createdAt:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: This project is made for assignments for a company. To make an example
+    of an OAuth 2.0 service that focuses on performance, maintainability, and scalability.
+  license:
+    name: MIT
+    url: https://github.com/ntsd/go-service/blob/main/LICENSE
+  title: Go Service
+  version: "1.0"
+paths:
+  /oauth/clients:
+    post:
+      consumes:
+      - application/json
+      description: create a new client
+      parameters:
+      - description: JSON body of the client
+        in: body
+        name: client
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateClientBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.CreateClientBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      tags:
+      - OAuth2
+  /oauth/token:
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: OAuth2 authentication only support Client Credentials grant type.
+        required `client_id` and `client_secret` on Basic Authentication to.
+      parameters:
+      - default: client_credentials
+        description: The grant_type parameter must must be `client_credentials`
+        in: formData
+        name: grant_type
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.AccessTokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      security:
+      - BasicAuth: []
+      tags:
+      - OAuth2
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: List users.
+      parameters:
+      - description: pagination offset, default is `0`
+        in: query
+        name: offset
+        type: integer
+      - description: pagination limit, default is `100`. If more than `100` will be
+          set as `100`.
+        in: query
+        name: limit
+        type: integer
+      - description: filter name by partial text search
+        in: query
+        name: name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      security:
+      - OAuth2Application: []
+      tags:
+      - Users
+    post:
+      consumes:
+      - application/json
+      description: create a new user
+      parameters:
+      - description: JSON body of the user
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateUserBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      security:
+      - OAuth2Application: []
+      tags:
+      - Users
+  /users/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get user by id
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      security:
+      - OAuth2Application: []
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      description: update a user, it will not insert if not existing.
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: JSON body of the user
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.UpdateUserBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.errorResponse'
+      security:
+      - OAuth2Application: []
+      tags:
+      - Users
+securityDefinitions:
+  BasicAuth:
+    type: basic
+  OAuth2Application:
+    flow: application
+    tokenUrl: /v1/oauth/token
+    type: oauth2
+swagger: "2.0"

@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: go-service-deployment
+  labels:
+    app: go-service
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: go-service
+  template:
+    metadata:
+      labels:
+        app: go-service
+    spec:
+      containers:
+        - name: go-service
+          image: go-service:latest
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: 2000m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          env:
+            - name: POSTGRES_URL
+              value: "postgresql://postgres:password@localhost:5432/go_service"
+            - name: DEV_MODE
+              value: "false"
+            - name: PREFORK
+              value: "false"
+            - name: ES256_PRIVATE_KEY
+              value: "./deployments/ec_private.pem"
+            - name: ES256_PUBLIC_KEY
+              value: "./deployments/ec_public.pem"
+            - name: APP_PORT
+              value: "8080"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: go-service
+  labels:
+    run: go-service
+spec:
+  ports:
+    - port: 8080
+  selector:
+    run: go-service

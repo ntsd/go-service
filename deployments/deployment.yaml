@@ -1,9 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: go-service-deployment
-  labels:
-    app: go-service
+  name: go-service
 spec:
   replicas: 3
   selector:
@@ -27,6 +25,8 @@ spec:
               cpu: 100m
               memory: 64Mi
           env:
+            - name: GOMAXPROCS
+              value: "1"
             - name: POSTGRES_URL
               value: "postgresql://postgres:password@localhost:5432/go_service"
             - name: DEV_MODE
@@ -45,10 +45,10 @@ apiVersion: v1
 kind: Service
 metadata:
   name: go-service
-  labels:
-    run: go-service
 spec:
+  type: ClusterIP
   ports:
     - port: 8080
+      protocol: TCP
   selector:
     run: go-service

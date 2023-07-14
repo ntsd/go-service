@@ -155,7 +155,7 @@ To deploy we using Kubernetes and Kubectl
 
 forward port to local port for testing, now the service will run on <http://localhost:8080>
 
-`kubectl port-forward deploy/go-service-deployment 8080:8080`
+`kubectl port-forward deploy/go-service 8080:8080`
 
 ## API Reference
 
@@ -230,6 +230,24 @@ example `SELEC * FROM users WHERE SIMILARITY(name,'John') > 0.4 ;`
 ### Kubernetes Horizontal Pod Autoscaler (HPA)
 
 [HPA](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/) allows automatically adjusting the number of pods based on resource utilization.
+
+Parameters
+
+`--cpu-percent=50`  the HPA controller will increase and decrease the number of replicas to maintain an average CPU utilization across all Pods of 50%.
+
+`kubectl autoscale deployment go-service --cpu-percent=50 --min=1 --max=10`
+
+check HPA status
+
+```bash
+kubectl get hpa
+# or force mode
+kubectl get hpa go-service --watch
+```
+
+Or using the yaml file
+
+`kubectl apply -f ./deployments/hpa.yaml`
 
 ### Kubernetes StatefulSets
 

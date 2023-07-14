@@ -9,6 +9,7 @@ This project is made for assignments for a company. To make an example of an OAu
   - [Project Layout](#project-layout)
   - [Environment Variables](#environment-variables)
   - [Development](#development)
+    - [Install Go Packages](#install-go-packages)
     - [Build Docker images](#build-docker-images)
     - [Run Postgres](#run-postgres)
     - [Run Migration](#run-migration)
@@ -71,6 +72,14 @@ Create `.env` file from `.env.example`
 `cp .env.example .env`
 
 ## Development
+
+### Install Go Packages
+
+If you want to run dry without docker you need to install [Go](https://go.dev/doc/install) (version > 18) on your local and install packages.
+
+```sh
+go mod download
+```
 
 ### Build Docker images
 
@@ -146,7 +155,12 @@ on the default port, the swagger URL will be `http://localhost:8080/swagger/`.
 
 To generate swagger
 
-`make gen-swagger`
+```sh
+# Install swag cli
+go get -u github.com/swaggo/swag/cmd/swag
+# Generate swagger
+make gen-swagger
+```
 
 ### Authentication
 

@@ -17,6 +17,8 @@ This project is made for assignments for a company. To make an example of an OAu
   - [Unit Testing](#unit-testing)
     - [GoMock](#gomock)
     - [Run Tests](#run-tests)
+  - [Deployment](#deployment)
+    - [Forward port](#forward-port)
   - [API Reference](#api-reference)
     - [Swagger](#swagger)
     - [Authentication](#authentication)
@@ -142,6 +144,18 @@ make test
 # or
 go test ./...
 ```
+
+## Deployment
+
+To deploy we using Kubernetes and Kubectl
+
+`kubectl apply -f ./deployments/deployment.yaml`
+
+### Forward port
+
+forward port to local port for testing, now the service will run on <http://localhost:8080>
+
+`kubectl port-forward deploy/go-service-deployment 8080:8080`
 
 ## API Reference
 

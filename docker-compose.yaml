@@ -28,7 +28,7 @@ services:
 
   service-app:
     container_name: go-service
-    image: go-service:latest
+    image: ntsd/go-service:latest
     build:
       context: .
       dockerfile: ./deployments/Dockerfile

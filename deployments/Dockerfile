@@ -20,7 +20,7 @@ WORKDIR /app
 
 # copy the binary file and env
 COPY --from=builder app/bin/main.bin ./main.bin
-COPY --from=builder app/deployments ./
+COPY --from=builder app/deployments ./deployments
 
 EXPOSE 8080
 

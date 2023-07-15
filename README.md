@@ -235,14 +235,14 @@ Parameters
 
 `--cpu-percent=50`  the HPA controller will increase and decrease the number of replicas to maintain an average CPU utilization across all Pods of 50%.
 
-`kubectl autoscale deployment go-service --cpu-percent=50 --min=1 --max=10`
+`kubectl autoscale deployment go-service-hpa --cpu-percent=50 --min=1 --max=10`
 
 check HPA status
 
 ```bash
 kubectl get hpa
 # or force mode
-kubectl get hpa go-service --watch
+kubectl get hpa go-service-hpa --watch
 ```
 
 Or using the yaml file

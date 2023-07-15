@@ -16,6 +16,7 @@ services:
 
   service-migrate:
     container_name: go-service-migrate
+    image: ntsd/go-service-migrate:latest
     build:
       context: .
       dockerfile: ./deployments/Dockerfile-migrate

@@ -12,6 +12,15 @@ spec:
       labels:
         app: go-service-label
     spec:
+      restartPolicy: Always
+      initContainers:
+        - name: go-service-migrate
+          image: ntsd/go-service-migrate:latest
+          env:
+            - name: GOMAXPROCS
+              value: "1"
+            - name: POSTGRES_URL
+              value: "postgresql://postgres:password@10.1.0.112:5432/go_service"
       containers:
         - name: go-service
           image: ntsd/go-service:latest
@@ -28,7 +37,7 @@ spec:
             - name: GOMAXPROCS
               value: "1"
             - name: POSTGRES_URL
-              value: "postgresql://postgres:password@localhost:5432/go_service"
+              value: "postgresql://postgres:password@10.1.0.112:5432/go_service"
             - name: DEV_MODE
               value: "false"
             - name: PREFORK

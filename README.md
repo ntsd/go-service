@@ -19,6 +19,7 @@ This project is made for assignments for a company. To make an example of an OAu
     - [Run Tests](#run-tests)
   - [Deployment](#deployment)
     - [Forward port](#forward-port)
+    - [Load Testing](#load-testing)
   - [API Reference](#api-reference)
     - [Swagger](#swagger)
     - [Authentication](#authentication)
@@ -149,13 +150,43 @@ go test ./...
 
 To deploy we using Kubernetes and Kubectl
 
-`kubectl apply -f ./deployments`
+```sh
+# apply postgres
+kubectl apply -f ./deployments/postgres
+
+# apply application
+kubectl apply -f ./deployments
+```
+
+Pod Forwarding for testing, *Note this is not load balancing because the port-forwarding only pick the first pod.
+
+`kubectl port-forward service/go-service-service 8080:8080`
 
 ### Forward port
 
 forward port to local port for testing, now the service will run on <http://localhost:8080>
 
 `kubectl port-forward deploy/go-service 8080:8080`
+
+### Load Testing
+
+If you run the service in Local you can just use [k6](https://github.com/grafana/k6)
+
+update host inside the `loadtest.js` file then `k6 loadtest.js`
+
+If you run the service in Kubernetes, I prefer to use [k6-operator](https://github.com/grafana/k6-operator) to run inside Kubernetes instead.
+
+1. Add configmap from file
+
+`kubectl create configmap loadtest --from-file loadtest.js`
+
+2. Run K6 Operator
+
+`kubectl apply -f ./deployments/loadtest/`
+
+To check resources used, run `kubectl top pods`
+
+To check HPA status, run `kubectl get hpa`
 
 ## API Reference
 

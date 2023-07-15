@@ -1,0 +1,10 @@
+apiVersion: k6.io/v1alpha1
+kind: K6
+metadata:
+  name: go-service-loadtest
+spec:
+  parallelism: 1
+  script:
+    configMap:
+      name: loadtest
+      file: loadtest.js

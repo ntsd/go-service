@@ -3,11 +3,12 @@ import http from "k6/http";
 import { b64encode } from "k6/encoding";
 import { check, fail } from "k6";
 
-const api = "http://localhost:8080/v1";
+const host = "http://go-service-service.default.svc.cluster.local:8080"
+const api = `${host}/v1`;
 
 export const options = {
   vus: 10,
-  duration: "15s",
+  duration: "5m",
 };
 
 function oauth2() {
@@ -24,7 +25,7 @@ function oauth2() {
     },
   });
   if (!check(res, { "status was 200": (r) => r.status == 200 })) {
-    fail(`status code was *not* 200 but ${res.status}`);
+    fail(`create user status code was *not* 200 but ${res.status} body ${res.body}`);
   }
 
   const basicAuth = b64encode(`${client_id}:${client_secret}`);
@@ -39,7 +40,7 @@ function oauth2() {
     }
   );
   if (!check(res2, { "status was 200": (r) => r.status == 200 })) {
-    fail(`status code was *not* 200 but ${res2.status}`);
+    fail(`oauth status code was *not* 200 but ${res2.status} body ${res2.body}`);
   }
 
   let data = {
@@ -100,9 +101,10 @@ function loadGetOneUser(data) {
 
 export default function (data) {
   // loadUnauthorized(data)
-  // loadCreateUser(data)
+	// oauth2()
+  loadCreateUser(data)
   // loadGetAllUsers(data);
-  loadGetOneUser(data);
+  // loadGetOneUser(data);
 }
 
 function randomString(length) {

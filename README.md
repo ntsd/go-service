@@ -149,7 +149,7 @@ go test ./...
 
 To deploy we using Kubernetes and Kubectl
 
-`kubectl apply -f ./deployments/deployment.yaml`
+`kubectl apply -f ./deployments`
 
 ### Forward port
 

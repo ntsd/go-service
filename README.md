@@ -175,7 +175,7 @@ forward port to local port for testing, now the service will run on <http://loca
 
 If you run the service in Local you can just use [k6](https://github.com/grafana/k6)
 
-Update the host inside the `./deployments/loadtest/loadtest.js` file then `k6 ./deployments/loadtest/loadtest.js`.
+Update the host inside the `./deployments/loadtest/loadtest.js` file then `k6 run ./deployments/loadtest/loadtest.js`.
 
 If you run the service in Kubernetes, I prefer to use [k6-operator](https://github.com/grafana/k6-operator) to run inside Kubernetes instead. Read <https://k6.io/blog/running-distributed-tests-on-k8s/> for installation.
 

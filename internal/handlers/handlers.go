@@ -13,6 +13,7 @@ import (
 
 	_ "go-service/docs"
 
+	"github.com/bytedance/sonic"
 	"github.com/go-playground/validator"
 )
 
@@ -47,6 +48,7 @@ func NewHandler(cfg *config.Config, store storage.Storage, jwt crypto.JWTFactory
 		store:     store,
 		jwt:       jwt,
 		validator: validator.New(),
+		preFork:   cfg.Prefork,
 	}, nil
 }
 
@@ -55,6 +57,8 @@ func (h *handler) Serve() {
 	app := fiber.New(fiber.Config{
 		Prefork:      h.preFork,
 		ErrorHandler: errorHandler,
+		JSONEncoder:  sonic.Marshal,
+		JSONDecoder:  sonic.Unmarshal,
 	})
 
 	app.Use(recover.New())

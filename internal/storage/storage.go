@@ -21,22 +21,36 @@ type Storage interface {
 
 // storage is the storage struct
 type storage struct {
-	db *gorm.DB
+	writeDB *gorm.DB
+	readDB  *gorm.DB
 }
 
 // NewStorage create a new storage
 func NewStorage(cfg *config.Config) (Storage, error) {
-	db, err := NewDatabase(cfg.PostgresURL)
+	writeDB, err := NewDatabase(cfg.PostgresWriteURL)
 	if err != nil {
-		return nil, fmt.Errorf("error to create database: %w", err)
+		return nil, fmt.Errorf("error to create write database: %w", err)
+	}
+	if cfg.DevMode {
+		writeDB = writeDB.Debug()
 	}
 
-	// debug mode
-	if cfg.DevMode {
-		db = db.Debug()
+	var readDB *gorm.DB
+	if cfg.PostgresWriteURL == cfg.PostgresReadURL {
+		readDB = writeDB
+	} else {
+		db, err := NewDatabase(cfg.PostgresReadURL)
+		if err != nil {
+			return nil, fmt.Errorf("error to create read database: %w", err)
+		}
+		if cfg.DevMode {
+			writeDB = writeDB.Debug()
+		}
+		readDB = db
 	}
 
 	return &storage{
-		db: db,
+		writeDB: writeDB,
+		readDB:  readDB,
 	}, nil
 }

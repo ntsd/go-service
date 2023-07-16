@@ -58,15 +58,16 @@ Project layout following <https://github.com/golang-standards/project-layout> a 
 
 ## Environment Variables
 
-| Key               | Description                            | Example                                       |
-| ----------------- | -------------------------------------- | --------------------------------------------- |
-| APP_PORT          | port number, default: `8080`           | 8080                                          |
-| POSTGRES_URL      | **Required** PostgreSQL URL            | postgresql://user:pass@localhost:5432/db_name |
-| DEV_MODE          | is developement mode, default: `false` | true                                          |
-| PREFORK           | is Prefork mode, default: `true`       | false                                         |
-| ES256_PRIVATE_KEY | **Required** path to ES256 private key | ./deployments/ec_private.pem                  |
-| ES256_PUBLIC_KEY  | **Required** path to ES256 public key  | ./deployments/ec_public.pem                   |
-| HASH_SALT         | hash salt, default: `change_this_salt` | salt                                          |
+| Key               | Description                                                                   | Example                                       |
+| ----------------- | ----------------------------------------------------------------------------- | --------------------------------------------- |
+| APP_PORT          | port number, default: `8080`                                                  | 8080                                          |
+| POSTGRES_URL      | **Required** PostgreSQL URL                                                   | postgresql://user:pass@localhost:5432/db_name |
+| POSTGRES_READ_URL | Postgres URL for read queries, default will be `POSTGRES_URL` if not defined. | postgresql://user:pass@db-slave:5432/db_name  |
+| DEV_MODE          | is developement mode, default: `false`                                        | true                                          |
+| PREFORK           | is Prefork mode, default: `true`                                              | false                                         |
+| ES256_PRIVATE_KEY | **Required** path to ES256 private key                                        | ./deployments/ec_private.pem                  |
+| ES256_PUBLIC_KEY  | **Required** path to ES256 public key                                         | ./deployments/ec_public.pem                   |
+| HASH_SALT         | hash salt, default: `change_this_salt`                                        | salt                                          |
 
 To make it easier, it has an example Dotenv file to make a simple run for testing (not recommend on prod).
 
@@ -151,14 +152,16 @@ go test ./...
 To deploy we using Kubernetes and Kubectl
 
 ```sh
-# apply postgres
-kubectl apply -f ./deployments/postgres
+# apply master postgres
+kubectl apply -f ./deployments/postgres/master.yaml
+# wait until the master start, apply slave postgres
+kubectl apply -f ./deployments/postgres/slave.yaml
 
 # apply application
 kubectl apply -f ./deployments
 ```
 
-Pod Forwarding for testing, *Note this is not load balancing because the port-forwarding only pick the first pod.
+Pod Forwarding for testing, \*Note this is not load balancing because the port-forwarding only pick the first pod.
 
 `kubectl port-forward service/go-service-service 8080:8080`
 
@@ -172,13 +175,13 @@ forward port to local port for testing, now the service will run on <http://loca
 
 If you run the service in Local you can just use [k6](https://github.com/grafana/k6)
 
-update host inside the `loadtest.js` file then `k6 loadtest.js`
+Update the host inside the `./deployments/loadtest/loadtest.js` file then `k6 ./deployments/loadtest/loadtest.js`.
 
-If you run the service in Kubernetes, I prefer to use [k6-operator](https://github.com/grafana/k6-operator) to run inside Kubernetes instead.
+If you run the service in Kubernetes, I prefer to use [k6-operator](https://github.com/grafana/k6-operator) to run inside Kubernetes instead. Read <https://k6.io/blog/running-distributed-tests-on-k8s/> for installation.
 
-1. Add configmap from file
+1. Create configmap from file
 
-`kubectl create configmap loadtest --from-file loadtest.js`
+`kubectl create configmap loadtest --from-file ./deployments/loadtest/loadtest.js --dry-run=client -o yaml > ./deployments/loadtest/configmap.yaml`
 
 2. Run K6 Operator
 
@@ -264,7 +267,7 @@ example `SELEC * FROM users WHERE SIMILARITY(name,'John') > 0.4 ;`
 
 Parameters
 
-`--cpu-percent=50`  the HPA controller will increase and decrease the number of replicas to maintain an average CPU utilization across all Pods of 50%.
+`--cpu-percent=50` the HPA controller will increase and decrease the number of replicas to maintain an average CPU utilization across all Pods of 50%.
 
 `kubectl autoscale deployment go-service-hpa --cpu-percent=50 --min=1 --max=10`
 

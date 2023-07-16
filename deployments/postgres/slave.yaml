@@ -1,0 +1,53 @@
+# using bitnami/postgres https://hub.docker.com/r/bitnami/postgresql for master/slave mode
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-slave-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: postgres-slave-label
+  template:
+    metadata:
+      labels:
+        app: postgres-slave-label
+    spec:
+      containers:
+        - name: postgres-slave
+          image: bitnami/postgresql:15.3.0
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USERNAME
+              value: "postgres"
+            - name: POSTGRES_PASSWORD
+              value: "password"
+            - name: POSTGRES_DATABASE
+              value: "go_service"
+            - name: POSTGRESQL_REPLICATION_MODE
+              value: "slave"
+            - name: POSTGRESQL_REPLICATION_USER
+              value: "my_repl_user"
+            - name: POSTGRESQL_REPLICATION_PASSWORD
+              value: "my_repl_password"
+            - name: POSTGRESQL_MASTER_HOST
+              value: "postgres-master-service.default.svc.cluster.local"
+            - name: POSTGRESQL_MASTER_PORT_NUMBER
+              value: "5432"
+            
+      restartPolicy: Always
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-slave-service
+spec:
+  selector:
+    app: postgres-slave-label
+  type: ClusterIP
+  ports:
+    - name: postgres-port
+      port: 5432

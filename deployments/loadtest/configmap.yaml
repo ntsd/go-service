@@ -1,0 +1,42 @@
+apiVersion: v1
+data:
+  loadtest.js: "import urlencode from \"https://jslib.k6.io/form-urlencoded/3.0.0/index.js\";\nimport
+    http from \"k6/http\";\nimport { b64encode } from \"k6/encoding\";\nimport { check,
+    fail } from \"k6\";\n\nconst host = \"http://go-service-service.default.svc.cluster.local:8080\"\nconst
+    api = `${host}/v1`;\n\nexport const options = {\n  vus: 20,\n  duration: \"2m\",\n};\n\nfunction
+    testOauth2() {\n  const client_id = randomString(32);\n  const client_secret =
+    randomString(32);\n  const body = {\n    client_id,\n    client_secret,\n  };\n\n
+    \ const res = http.post(`${api}/oauth/clients`, JSON.stringify(body), {\n    headers:
+    {\n      \"Content-Type\": \"application/json\",\n    },\n  });\n  if (!check(res,
+    { \"status was 200\": (r) => r.status == 200 })) {\n    fail(`create user status
+    code was *not* 200 but ${res.status} body ${res.body}`);\n  }\n\n  const basicAuth
+    = b64encode(`${client_id}:${client_secret}`);\n  const res2 = http.post(\n    `${api}/oauth/token`,\n
+    \   urlencode({ grant_type: \"client_credentials\" }),\n    {\n      headers:
+    {\n        \"Content-Type\": \"application/x-www-form-urlencoded\",\n        Authorization:
+    `Basic ${basicAuth}`,\n      },\n    }\n  );\n  if (!check(res2, { \"status was
+    200\": (r) => r.status == 200 })) {\n    fail(`oauth status code was *not* 200
+    but ${res2.status} body ${res2.body}`);\n  }\n\n  let data = {\n    access_token:
+    JSON.parse(res2.body).access_token,\n  };\n\n  data.userId = testCreateUser(data);\n\n
+    \ return data;\n}\n\nexport function setup() {\n  return testOauth2();\n}\n\nfunction
+    testUnauthorized(data) {\n  let res = http.get(api);\n  check(res, { \"status
+    was 401\": (r) => r.status == 401 });\n}\n\nfunction testCreateUser(data) {\n
+    \ const res = http.post(\n    `${api}/users`,\n    JSON.stringify({\n      email:
+    `${randomString(20)}@example.com`,\n      name: \"test\",\n    }),\n    {\n      headers:
+    {\n        \"Content-Type\": \"application/json\",\n        authorization: `Bearer
+    ${data.access_token}`,\n      },\n    }\n  );\n  check(res, { \"status was 200\":
+    (r) => r.status == 200 });\n  return JSON.parse(res.body).id;\n}\n\nfunction testGetAllUsers(data)
+    {\n  const res = http.get(`${api}/users`, {\n    headers: {\n      \"Content-Type\":
+    \"application/json\",\n      authorization: `Bearer ${data.access_token}`,\n    },\n
+    \ });\n  check(res, { \"status was 200\": (r) => r.status == 200 });\n}\n\nfunction
+    testGetOneUser(data) {\n  const res = http.get(`${api}/users/${data.userId}`,
+    {\n    headers: {\n      \"Content-Type\": \"application/json\",\n      authorization:
+    `Bearer ${data.access_token}`,\n    },\n  });\n  check(res, { \"status was 200\":
+    (r) => r.status == 200 });\n}\n\nexport default function (data) {\n  // testUnauthorized(data)\n\t//
+    testOauth2()\n  // testCreateUser(data)\n  // testGetAllUsers(data);\n  testGetOneUser(data);\n}\n\nfunction
+    randomString(length) {\n  const characters = \"0123456789abcdefghijklmnopqrstuvwxyz\";\n
+    \ let result = \"\";\n  for (let i = length; i > 0; i--) {\n    result += characters[Math.floor(Math.random()
+    * characters.length)];\n  }\n  return result;\n}\n"
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: loadtest

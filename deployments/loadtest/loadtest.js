@@ -7,11 +7,11 @@ const host = "http://go-service-service.default.svc.cluster.local:8080"
 const api = `${host}/v1`;
 
 export const options = {
-  vus: 10,
-  duration: "5m",
+  vus: 20,
+  duration: "2m",
 };
 
-function oauth2() {
+function testOauth2() {
   const client_id = randomString(32);
   const client_secret = randomString(32);
   const body = {
@@ -47,21 +47,21 @@ function oauth2() {
     access_token: JSON.parse(res2.body).access_token,
   };
 
-  data.userId = loadCreateUser(data);
+  data.userId = testCreateUser(data);
 
   return data;
 }
 
 export function setup() {
-  return oauth2();
+  return testOauth2();
 }
 
-function loadUnauthorized(data) {
+function testUnauthorized(data) {
   let res = http.get(api);
   check(res, { "status was 401": (r) => r.status == 401 });
 }
 
-function loadCreateUser(data) {
+function testCreateUser(data) {
   const res = http.post(
     `${api}/users`,
     JSON.stringify({
@@ -79,7 +79,7 @@ function loadCreateUser(data) {
   return JSON.parse(res.body).id;
 }
 
-function loadGetAllUsers(data) {
+function testGetAllUsers(data) {
   const res = http.get(`${api}/users`, {
     headers: {
       "Content-Type": "application/json",
@@ -89,7 +89,7 @@ function loadGetAllUsers(data) {
   check(res, { "status was 200": (r) => r.status == 200 });
 }
 
-function loadGetOneUser(data) {
+function testGetOneUser(data) {
   const res = http.get(`${api}/users/${data.userId}`, {
     headers: {
       "Content-Type": "application/json",
@@ -100,11 +100,11 @@ function loadGetOneUser(data) {
 }
 
 export default function (data) {
-  // loadUnauthorized(data)
-	// oauth2()
-  loadCreateUser(data)
-  // loadGetAllUsers(data);
-  // loadGetOneUser(data);
+  // testUnauthorized(data)
+	// testOauth2()
+  // testCreateUser(data)
+  // testGetAllUsers(data);
+  testGetOneUser(data);
 }
 
 function randomString(length) {

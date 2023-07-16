@@ -11,20 +11,25 @@ import (
 
 // Config is environment config
 type Config struct {
-	AppPort        string
-	PostgresURL    string
-	DevMode        bool
-	Prefork        bool
-	PrivateKeyPath string
-	PublicKeyPath  string
-	HashSalt       string
+	AppPort          string
+	PostgresWriteURL string
+	PostgresReadURL  string
+	DevMode          bool
+	Prefork          bool
+	PrivateKeyPath   string
+	PublicKeyPath    string
+	HashSalt         string
 }
 
 // NewConfig returns environment config
 func NewConfig() *Config {
 	return &Config{
-		AppPort:        defaultENV("APP_PORT", "8080"),
-		PostgresURL:    requiredENV("POSTGRES_URL"),
+		AppPort:          defaultENV("APP_PORT", "8080"),
+		PostgresWriteURL: requiredENV("POSTGRES_URL"),
+		PostgresReadURL: defaultENV(
+			"POSTGRES_READ_URL",
+			requiredENV("POSTGRES_URL"),
+		),
 		DevMode:        defaultENV("DEV_MODE", "false") == "true",
 		Prefork:        defaultENV("PREFORK", "true") == "true",
 		PrivateKeyPath: requiredENV("ES256_PRIVATE_KEY"),

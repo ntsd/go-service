@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: go-service-deployment
 spec:
-  replicas: 3
+  replicas: 10
   selector:
     matchLabels:
       app: go-service-label
@@ -20,7 +20,7 @@ spec:
             - name: GOMAXPROCS
               value: "1"
             - name: POSTGRES_URL
-              value: "postgresql://postgres:password@postgres-service.default.svc.cluster.local:5432/go_service"
+              value: "postgresql://postgres:password@postgres-master-service.default.svc.cluster.local:5432/go_service"
       containers:
         - name: go-service
           image: ntsd/go-service:latest
@@ -37,7 +37,9 @@ spec:
             - name: GOMAXPROCS
               value: "1"
             - name: POSTGRES_URL
-              value: "postgresql://postgres:password@postgres-service.default.svc.cluster.local:5432/go_service"
+              value: "postgresql://postgres:password@postgres-master-service.default.svc.cluster.local:5432/go_service"
+            - name: POSTGRES_READ_URL
+              value: "postgresql://postgres:password@postgres-slave-service.default.svc.cluster.local:5432/go_service"
             - name: DEV_MODE
               value: "false"
             - name: PREFORK

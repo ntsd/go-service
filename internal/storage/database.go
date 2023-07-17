@@ -24,6 +24,18 @@ func NewDatabase(postgresURL string) (*gorm.DB, error) {
 			time.Sleep(3 * time.Second)
 			continue
 		}
+
+		// set min, max, and connection time for pool connnections
+		sqlDB, err := db.DB()
+		if err != nil {
+			finalErr = err
+			time.Sleep(3 * time.Second)
+			continue
+		}
+		sqlDB.SetMaxIdleConns(10)
+		sqlDB.SetMaxOpenConns(100)
+		sqlDB.SetConnMaxLifetime(time.Hour)
+
 		return db, nil
 	}
 

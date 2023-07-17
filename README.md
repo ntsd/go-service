@@ -25,11 +25,13 @@ This project is made for assignments for a company. To make an example of an OAu
     - [Authentication](#authentication)
   - [Web Framework](#web-framework)
     - [Why Fiber and FastHTTP?](#why-fiber-and-fasthttp)
+    - [JSON Serializing](#json-serializing)
   - [Database](#database)
     - [Why PostgreSQL and Gorm?](#why-postgresql-and-gorm)
     - [Caches Prepared Statement](#caches-prepared-statement)
     - [Index Hints](#index-hints)
     - [Trigram (pg\_trgm)](#trigram-pg_trgm)
+    - [Connection pool](#connection-pool)
   - [Scalibility](#scalibility)
     - [Kubernetes Horizontal Pod Autoscaler (HPA)](#kubernetes-horizontal-pod-autoscaler-hpa)
     - [Kubernetes StatefulSets](#kubernetes-statefulsets)
@@ -228,6 +230,10 @@ This API only supports [OAuth 2 Client Credentials](https://www.oauth.com/oauth2
 
 4. Prefork Support, Preforking makes use of single Go processes but will load balance connections on the OS level by [SO_REUSEPORT](https://lwn.net/Articles/542629/) basically for running multiple servers using the same port. But when using Kubernetes they prefer to run a separate server instance per CPU core with `GOMAXPROCS=1` and `Prefork` to False to spawn pods by auto-scaling instead.
 
+### JSON Serializing
+
+[Sonic](https://github.com/bytedance/sonic) is a fast JSON Serializer, much faster than the built-in from my texting. The library does not enable HTML escaping and SortKeys features by default if we enable it will lose some performance. The downside is they say it may not support well on all environments.
+
 ## Database
 
 ### Why PostgreSQL and Gorm?
@@ -258,6 +264,10 @@ For Partial/Full Text Seach, PostgreSQL has built-in [pg_trgm](https://www.postg
 By using trigrams, we can compare similar trigrams using `SIMILARITY` or `%` operators.
 
 example `SELEC * FROM users WHERE SIMILARITY(name,'John') > 0.4 ;`
+
+### Connection pool
+
+For a bettter Database connection may considor the connection pool to keep the connection opening and ready for the query.
 
 ## Scalibility
 

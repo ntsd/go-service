@@ -1,28 +1,14 @@
-# Go Service Example
+# Go Service
 
-This project is made for assignments for a company. To make an example of an OAuth 2.0 service that focuses on performance, maintainability, and scalability.
+An example of Go API and Kubernetes config focusing on performance, high availability, and scalability.
 
 ## Table of Contents
 
-- [Go Service Example](#go-service-example)
+- [Go Service](#go-service)
   - [Table of Contents](#table-of-contents)
   - [Project Layout](#project-layout)
-  - [Environment Variables](#environment-variables)
-  - [Development](#development)
-    - [Install Go Packages](#install-go-packages)
-    - [Build Docker images](#build-docker-images)
-    - [Run Postgres](#run-postgres)
-    - [Run Migration](#run-migration)
-    - [Run Server](#run-server)
-  - [Unit Testing](#unit-testing)
-    - [GoMock](#gomock)
-    - [Run Tests](#run-tests)
-  - [Deployment](#deployment)
-    - [Forward port](#forward-port)
-    - [Load Testing](#load-testing)
   - [API Reference](#api-reference)
     - [Swagger](#swagger)
-    - [Authentication](#authentication)
   - [Web Framework](#web-framework)
     - [Why Fiber and FastHTTP?](#why-fiber-and-fasthttp)
     - [JSON Serializing](#json-serializing)
@@ -35,11 +21,23 @@ This project is made for assignments for a company. To make an example of an OAu
   - [Scalibility](#scalibility)
     - [Kubernetes Horizontal Pod Autoscaler (HPA)](#kubernetes-horizontal-pod-autoscaler-hpa)
     - [Kubernetes StatefulSets](#kubernetes-statefulsets)
+  - [Environment Variables](#environment-variables)
+  - [Development](#development)
+    - [Install Go Packages](#install-go-packages)
+    - [Build Docker images](#build-docker-images)
+    - [Run Postgres](#run-postgres)
+    - [Run Migration](#run-migration)
+    - [Run Server](#run-server)
+  - [Unit Testing](#unit-testing)
+    - [GoMock](#gomock)
+    - [Run Tests](#run-tests)
+  - [Deployment](#deployment)
+    - [Load Testing](#load-testing)
   - [References](#references)
 
 ## Project Layout
 
-Project layout following <https://github.com/golang-standards/project-layout> a non official stadard by the core Go dev team.
+The project layout is following <https://github.com/golang-standards/project-layout> a non official stadard.
 
 ```
 ├── cmd
@@ -57,141 +55,6 @@ Project layout following <https://github.com/golang-standards/project-layout> a 
     └── storage                 - database storage and repositories
         └── mock_storage
 ```
-
-## Environment Variables
-
-| Key               | Description                                                                   | Example                                       |
-| ----------------- | ----------------------------------------------------------------------------- | --------------------------------------------- |
-| APP_PORT          | port number, default: `8080`                                                  | 8080                                          |
-| POSTGRES_URL      | **Required** PostgreSQL URL                                                   | postgresql://user:pass@localhost:5432/db_name |
-| POSTGRES_READ_URL | Postgres URL for read queries, default will be `POSTGRES_URL` if not defined. | postgresql://user:pass@db-slave:5432/db_name  |
-| DEV_MODE          | is developement mode, default: `false`                                        | true                                          |
-| PREFORK           | is Prefork mode, default: `true`                                              | false                                         |
-| ES256_PRIVATE_KEY | **Required** path to ES256 private key                                        | ./deployments/ec_private.pem                  |
-| ES256_PUBLIC_KEY  | **Required** path to ES256 public key                                         | ./deployments/ec_public.pem                   |
-| HASH_SALT         | hash salt, default: `change_this_salt`                                        | salt                                          |
-
-To make it easier, it has an example Dotenv file to make a simple run for testing (not recommend on prod).
-
-Create `.env` file from `.env.example`
-
-`cp .env.example .env`
-
-## Development
-
-### Install Go Packages
-
-If you want to run dry without docker you need to install [Go](https://go.dev/doc/install) (version > 18) on your local and install packages.
-
-```sh
-go mod download
-```
-
-### Build Docker images
-
-```sh
-make docker-build
-# or
-docker-compose build --no-cache
-```
-
-### Run Postgres
-
-```sh
-make docker-postgres
-# or
-docker-compose up service-postgres
-```
-
-### Run Migration
-
-Required to run migrate database before running the server.
-
-```sh
-go run ./cmd/migrate/migrate.go -mode=up
-# or
-docker-compose up service-migrate
-```
-
-For migrate down
-
-`go run ./cmd/migrate/migrate.go -mode=down`
-
-### Run Server
-
-```sh
-go run ./cmd/service/main.go
-# or
-docker-compose up service-app
-# or
-make docker-up
-```
-
-## Unit Testing
-
-### GoMock
-
-[gomock](https://github.com/golang/mock) is a mocking framework for Go.
-
-Install gomock
-
-`GO111MODULE=on go get github.com/golang/mock/mockgen@v1.6.0`
-
-Mockgen
-
-`make mockgen`
-
-### Run Tests
-
-```sh
-make test
-# or
-go test ./...
-```
-
-## Deployment
-
-To deploy we using Kubernetes and Kubectl
-
-```sh
-# apply master postgres
-kubectl apply -f ./deployments/postgres/master.yaml
-# wait until the master start, apply slave postgres
-kubectl apply -f ./deployments/postgres/slave.yaml
-
-# apply application
-kubectl apply -f ./deployments
-```
-
-Pod Forwarding for testing, \*Note this is not load balancing because the port-forwarding only pick the first pod.
-
-`kubectl port-forward service/go-service-service 8080:8080`
-
-### Forward port
-
-forward port to local port for testing, now the service will run on <http://localhost:8080>
-
-`kubectl port-forward deploy/go-service 8080:8080`
-
-### Load Testing
-
-If you run the service in Local you can just use [k6](https://github.com/grafana/k6)
-
-Update the host inside the `./deployments/loadtest/loadtest.js` file then `k6 run ./deployments/loadtest/loadtest.js`.
-
-If you run the service in Kubernetes, I prefer to use [k6-operator](https://github.com/grafana/k6-operator) to run inside Kubernetes instead. Read <https://k6.io/blog/running-distributed-tests-on-k8s/> for installation.
-
-1. Create configmap from file
-
-`kubectl create configmap loadtest --from-file ./deployments/loadtest/loadtest.js --dry-run=client -o yaml > ./deployments/loadtest/configmap.yaml`
-
-2. Run K6 Operator
-
-`kubectl apply -f ./deployments/loadtest/`
-
-To check resources used, run `kubectl top pods`
-
-To check HPA status, run `kubectl get hpa`
 
 ## API Reference
 
@@ -212,9 +75,7 @@ go get -u github.com/swaggo/swag/cmd/swag
 make gen-swagger
 ```
 
-### Authentication
-
-This API only supports [OAuth 2 Client Credentials](https://www.oauth.com/oauth2-servers/access-tokens/client-credentials/) grant types.
+* This API only supports [OAuth 2 Client Credentials](https://www.oauth.com/oauth2-servers/access-tokens/client-credentials/) grant types.
 
 ## Web Framework
 
@@ -296,6 +157,135 @@ Or using the yaml file
 ### Kubernetes StatefulSets
 
 Deploying a Database on K8S might be too complex for auto-scaling. [StatefulSets](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/) allows creating clusters/replicas sets of PostgreSQL by a specific number of instances.
+
+## Environment Variables
+
+| Key               | Description                                                                   | Example                                       |
+| ----------------- | ----------------------------------------------------------------------------- | --------------------------------------------- |
+| APP_PORT          | port number, default: `8080`                                                  | 8080                                          |
+| POSTGRES_URL      | **Required** PostgreSQL URL                                                   | postgresql://user:pass@localhost:5432/db_name |
+| POSTGRES_READ_URL | Postgres URL for read queries, default will be `POSTGRES_URL` if not defined. | postgresql://user:pass@db-slave:5432/db_name  |
+| DEV_MODE          | is developement mode, default: `false`                                        | true                                          |
+| PREFORK           | is Prefork mode, default: `true`                                              | false                                         |
+| ES256_PRIVATE_KEY | **Required** path to ES256 private key                                        | ./deployments/ec_private.pem                  |
+| ES256_PUBLIC_KEY  | **Required** path to ES256 public key                                         | ./deployments/ec_public.pem                   |
+| HASH_SALT         | hash salt, default: `change_this_salt`                                        | salt                                          |
+
+To make it easier, it has an example Dotenv file to make a simple run for testing (not recommend on prod).
+
+Create `.env` file from `.env.example`
+
+`cp .env.example .env`
+
+## Development
+
+### Install Go Packages
+
+If you want to run without docker you need to install [Go](https://go.dev/doc/install) (version > 1.8) on your local and install packages by:
+
+```sh
+go mod download
+```
+
+### Build Docker images
+
+```sh
+docker-compose build --no-cache
+# or
+make docker-build
+```
+
+### Run Postgres
+
+```sh
+docker-compose up service-postgres
+# or
+make docker-postgres
+```
+
+### Run Migration
+
+Required to run migrate database before running the server.
+
+```sh
+go run ./cmd/migrate/migrate.go -mode=up
+# or
+docker-compose up service-migrate
+```
+
+For migrate down
+
+`go run ./cmd/migrate/migrate.go -mode=down`
+
+### Run Server
+
+```sh
+go run ./cmd/service/main.go
+# or
+docker-compose up service-app
+# or
+make docker-up
+```
+
+## Unit Testing
+
+### GoMock
+
+[gomock](https://github.com/golang/mock) is a mocking framework for Go.
+
+Install gomock
+
+`GO111MODULE=on go get github.com/golang/mock/mockgen@v1.6.0`
+
+Mockgen
+
+`make mockgen`
+
+### Run Tests
+
+```sh
+make test
+# or
+go test ./...
+```
+
+## Deployment
+
+To deploy we using Kubernetes and Kubectl.
+
+```sh
+# apply master postgres
+kubectl apply -f ./deployments/postgres/master.yaml
+# wait until the master start, apply slave postgres
+kubectl apply -f ./deployments/postgres/slave.yaml
+
+# apply application
+kubectl apply -f ./deployments
+```
+
+Pod Forwarding for testing, \*Note this is not load balancing because the port-forwarding only pick the first pod.
+
+`kubectl port-forward service/go-service-service 8080:8080`
+
+### Load Testing
+
+If you run the service in Local you can just use [k6](https://github.com/grafana/k6)
+
+Update the host inside the `./deployments/loadtest/loadtest.js` file then `k6 run ./deployments/loadtest/loadtest.js`.
+
+If you run the service in Kubernetes, I prefer to use [k6-operator](https://github.com/grafana/k6-operator) to run inside Kubernetes instead. Read <https://k6.io/blog/running-distributed-tests-on-k8s/> for installation.
+
+1. Create configmap from file
+
+`kubectl create configmap loadtest --from-file ./deployments/loadtest/loadtest.js --dry-run=client -o yaml > ./deployments/loadtest/configmap.yaml`
+
+2. Run K6 Operator
+
+`kubectl apply -f ./deployments/loadtest/`
+
+To check resources used, run `kubectl top pods`
+
+To check HPA status, run `kubectl get hpa`
 
 ## References
 

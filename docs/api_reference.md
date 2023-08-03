@@ -1,6 +1,6 @@
 # Go Service
 
-This project is made for assignments for a company. To make an example of an OAuth 2.0 service that focuses on performance, maintainability, and scalability.
+An example of Go API and Kubernetes config focusing on performance, high availability, and scalability.
 
 ## Version: 1.0
 

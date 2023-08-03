@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "This project is made for assignments for a company. To make an example of an OAuth 2.0 service that focuses on performance, maintainability, and scalability.",
+        "description": "An example of Go API and Kubernetes config focusing on performance, high availability, and scalability.",
         "title": "Go Service",
         "contact": {},
         "license": {
@@ -462,7 +462,7 @@
             "description": "User information includes id, email, and name.",
             "type": "object",
             "properties": {
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
                 "email": {
@@ -474,7 +474,7 @@
                 "name": {
                     "type": "string"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 }
             }

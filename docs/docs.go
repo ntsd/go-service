@@ -469,7 +469,7 @@ const docTemplate = `{
             "description": "User information includes id, email, and name.",
             "type": "object",
             "properties": {
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
                 "email": {
@@ -481,7 +481,7 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -506,7 +506,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/v1",
 	Schemes:          []string{},
 	Title:            "Go Service",
-	Description:      "This project is made for assignments for a company. To make an example of an OAuth 2.0 service that focuses on performance, maintainability, and scalability.",
+	Description:      "An example of Go API and Kubernetes config focusing on performance, high availability, and scalability.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }

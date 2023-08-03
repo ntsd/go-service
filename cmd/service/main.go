@@ -12,7 +12,7 @@ import (
 
 // @title         Go Service
 // @version       1.0
-// @description   This project is made for assignments for a company. To make an example of an OAuth 2.0 service that focuses on performance, maintainability, and scalability.
+// @description   An example of Go API and Kubernetes config focusing on performance, high availability, and scalability.
 // @license.name  MIT
 // @license.url   https://github.com/ntsd/go-service/blob/main/LICENSE
 // @BasePath  	  /v1
